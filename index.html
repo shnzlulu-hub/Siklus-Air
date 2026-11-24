@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petualangan Siklus Air</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eaf6fb;--surface:#fff;--ink:#0b2a3c;--muted:#4b6878;--primary:#0a7bb8;--primary-d:#075c8a;--accent:#ffb703;--line:#cfe3ee;--sky1:#bfe6fa;--sky2:#eaf6fb;--sea:#1b86c8;--ground:#8a6d4b;--grass:#5fae5f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07202f;--surface:#0d3047;--ink:#e6f4fb;--muted:#9bbccf;--primary:#4fc3f7;--primary-d:#8fd9fb;--line:#1d4a66;--sky1:#0f3a56;--sky2:#0d3047;--sea:#1f7fb8;--ground:#6b543a;--grass:#3f8a4a}}
+:root[data-theme="dark"]{--bg:#07202f;--surface:#0d3047;--ink:#e6f4fb;--muted:#9bbccf;--primary:#4fc3f7;--primary-d:#8fd9fb;--line:#1d4a66;--sky1:#0f3a56;--sky2:#0d3047;--sea:#1f7fb8;--ground:#6b543a;--grass:#3f8a4a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;line-height:1.6;min-height:100vh}
+h1,h2,h3{font-family:'Baloo 2',Nunito,sans-serif;line-height:1.15;margin:0 0 .5em}
+.hidden{display:none!important}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{background:var(--primary);color:#fff;border:0;border-radius:999px;padding:.7em 1.5em;font-weight:700;transition:transform .15s,background .15s}
+.btn:hover{background:var(--primary-d);transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+.btn.ghost:hover{background:var(--primary);color:#fff}
+/* LOGIN */
+#login{min-height:100vh;display:grid;place-items:center;padding:1.5rem;background:linear-gradient(180deg,var(--sky1),var(--sky2));position:relative;overflow:hidden}
+.drops span{position:absolute;top:-30px;width:10px;height:16px;background:var(--primary);opacity:.35;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh)}}
+.card{position:relative;background:var(--surface);border-radius:28px;padding:2rem;width:100%;max-width:400px;box-shadow:0 20px 50px rgba(10,123,184,.2)}
+.card h1{font-size:2rem;text-align:center}
+.card p.sub{text-align:center;color:var(--muted);margin-top:-.3em}
+label{display:block;font-weight:700;margin:1rem 0 .3rem}
+input[type=text],input[type=password],input[type=url]{width:100%;padding:.75em 1em;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+input:focus{border-color:var(--primary);outline:none}
+.err{color:#d6336c;font-weight:700;min-height:1.5em;margin:.6rem 0 0}
+.hint{background:var(--bg);border-radius:12px;padding:.6rem .9rem;font-size:.9rem;color:var(--muted);margin-top:1rem}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.7em 1.4em;border-radius:999px;font-weight:700;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+/* APP */
+header.nav{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:2px solid var(--line);padding:.7rem 1rem;padding-top:calc(.7rem + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.brand{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;color:var(--primary);margin-right:auto}
+.nav button.link{background:none;border:0;color:var(--ink);font-weight:700;padding:.5em .9em;border-radius:999px}
+.nav button.link:hover{background:var(--bg)}
+.nav button.link[aria-current=page]{background:var(--primary);color:#fff}
+main{max-width:980px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.hero{background:linear-gradient(180deg,var(--sky1),var(--sky2));border-radius:28px;padding:2rem 1.5rem 1rem;text-align:center}
+.hero h1{font-size:clamp(2rem,6vw,3.2rem);color:var(--primary-d)}
+.hero p{max-width:55ch;margin:0 auto 1rem;color:var(--muted)}
+svg.diagram{width:100%;height:auto;display:block;max-width:760px;margin:0 auto}
+.stage{cursor:pointer}
+.stage .hot{opacity:0;transition:opacity .2s}
+.stage:hover .hot,.stage.on .hot{opacity:1}
+.stage:focus-visible{outline:none}
+.stage:focus-visible .hot{opacity:1}
+.cloud-move{animation:drift 8s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(18px)}}
+.rain line{animation:rain 1s linear infinite}
+@keyframes rain{from{transform:translateY(-6px);opacity:0}50%{opacity:1}to{transform:translateY(12px);opacity:0}}
+.vap path{animation:rise 2.4s ease-in infinite}
+@keyframes rise{from{transform:translateY(8px);opacity:0}50%{opacity:1}to{transform:translateY(-10px);opacity:0}}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+.tabs button{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:.5em 1.1em;font-weight:700;color:var(--ink)}
+.tabs button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.info{background:var(--surface);border-radius:20px;padding:1.2rem 1.4rem;margin:0 auto;max-width:640px;text-align:left;border-left:8px solid var(--accent)}
+.info h3{margin-bottom:.2em}
+section.block{margin-top:2.5rem}
+section.block>h2{font-size:1.8rem;color:var(--primary-d)}
+.panel{background:var(--surface);border-radius:24px;padding:1.4rem}
+.game-grid{display:grid;gap:1.2rem;grid-template-columns:1fr 1fr}
+@media(max-width:760px){.game-grid{grid-template-columns:1fr}}
+.h5p-frame{width:100%;height:380px;border:2px dashed var(--line);border-radius:16px;background:var(--bg);display:grid;place-items:center;text-align:center;color:var(--muted);padding:1rem}
+iframe.h5p{width:100%;height:520px;border:0;border-radius:16px;background:var(--bg)}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.row input{flex:1;min-width:180px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0}
+.opts button{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:.8em;font-weight:700;color:var(--ink)}
+.opts button:disabled{background:var(--primary);color:#fff;border-color:var(--primary);cursor:default}
+.slots{display:flex;gap:.4rem;flex-wrap:wrap;min-height:2.5rem}
+.slots span{background:var(--accent);color:#3a2a00;border-radius:999px;padding:.2em .9em;font-weight:700}
+.msg{font-weight:700;min-height:1.6em}
+.about-grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:1rem}
+.about-grid .panel h3{font-size:1.15rem}
+ol.steps{padding-left:1.2rem}
+code{background:var(--bg);padding:.1em .4em;border-radius:6px;font-size:.9em}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+input[type=range]{width:100%;accent-color:var(--primary)}
+.bar{height:12px;background:var(--bg);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.meter{margin:.6rem 0;font-weight:700}
+.dopts{display:grid;gap:.6rem;margin:1rem 0}
+.dopts button{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:.8em 1em;font-weight:700;color:var(--ink);text-align:left}
+.tab-note{text-align:center;color:var(--muted)}
+footer{text-align:center;color:var(--muted);padding:1rem}
+body{font-size:1.05rem;background:linear-gradient(180deg,var(--sky1),var(--bg) 40%) fixed}
+.sky{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sky i{position:absolute;left:0;font-style:normal;font-size:3rem;opacity:.55;animation:fly linear infinite}
+@keyframes fly{from{transform:translateX(-15vw)}to{transform:translateX(115vw)}}
+main,footer{position:relative;z-index:1}
+main{padding-bottom:7rem}
+.btn{box-shadow:0 5px 0 var(--primary-d)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--primary-d)}
+.btn.ghost,.btn:disabled{box-shadow:none}
+.panel,.hero,.info{box-shadow:0 8px 24px rgba(10,123,184,.12)}
+.panel{border:2px solid var(--line)}
+.about-grid .panel{transition:transform .2s}.about-grid .panel:hover{transform:translateY(-4px) rotate(-.5deg)}
+.stars{background:var(--accent);color:#3a2a00;font-weight:800;padding:.2em .8em;border-radius:999px}
+#tstep>div{animation:pop .4s}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+#mas{position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:15;display:flex;align-items:flex-end;gap:.4rem;cursor:pointer}
+#mas svg{animation:bob 2s ease-in-out infinite;flex:none}
+@keyframes bob{50%{transform:translateY(-8px)}}
+#bub{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:.5rem .8rem;max-width:200px;font-size:.85rem;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.mem{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:.6rem;max-width:560px;margin:1rem auto}
+.mc{aspect-ratio:1;border:0;border-radius:16px;background:var(--primary);color:#fff;font-size:1.8rem;font-weight:700;box-shadow:0 4px 0 var(--primary-d)}
+.mc.up{background:var(--surface);color:var(--ink);border:3px solid var(--accent);font-size:.8rem;box-shadow:none}
+.mc.em.up{font-size:2.4rem}
+.mc.ok{border-color:#2e9e5b;background:rgba(46,158,91,.35)}
+.cf{position:fixed;top:-10px;width:10px;height:14px;z-index:60;animation:cf 2s linear forwards}
+@keyframes cf{to{transform:translateY(105vh) rotate(540deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="drops" aria-hidden="true"></div>
+  <div class="card">
+    <h1>💧 Siklus Air</h1>
+    <p class="sub">Masuk untuk mulai belajar IPAS</p>
+    <div id="lf" role="group" aria-label="Form masuk">
+      <label for="u">Nama pengguna</label>
+      <input id="u" type="text" autocomplete="username" placeholder="Nama pengguna">
+      <label for="p">Kata sandi</label>
+      <input id="p" type="password" autocomplete="current-password" placeholder="Kata sandi">
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn" id="loginBtn" style="width:100%;margin-top:.5rem">Masuk</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="sky" aria-hidden="true"><i style="top:12%;animation-duration:60s">☁️</i><i style="top:38%;animation-duration:90s;animation-delay:-30s">☁️</i><i style="top:62%;animation-duration:75s;animation-delay:-50s">☁️</i></div>
+  <header class="nav">
+    <span class="brand">💧 Siklus Air</span>
+    <button class="link" data-go="home" aria-current="page">Beranda</button>
+    <button class="link" data-go="tutorial">Tutorial</button>
+    <button class="link" data-go="drill">Latihan</button>
+    <button class="link" data-go="sim">Simulasi</button>
+    <button class="link" data-go="game">Game</button>
+    <button class="link" data-go="about">Tentang</button>
+    <span class="stars" id="stars" title="Bintang kamu">⭐ 0</span>
+    <button class="link" id="sndBtn" aria-label="Nyalakan atau matikan musik">🔊</button>
+    <button class="link" id="songBtn" title="Ganti lagu">🎵 </button>
+    <button class="link" id="logoutBtn">Keluar</button>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <div id="home">
+      <div class="hero">
+        <h1>Halo, <span id="nm">Siswa</span>! Selamat datang 👋</h1>
+        <p>Ayo berpetualang bersama Tetes si tetes air! Baca materinya, mainkan game, dan kumpulkan bintang ⭐ sebanyak-banyaknya.</p>
+      </div>
+      <section class="block panel">
+        <h2>Apa itu siklus air?</h2>
+        <p>Siklus air adalah perjalanan air yang berputar terus-menerus: dari laut dan daratan naik ke udara, turun lagi sebagai hujan, lalu mengalir atau meresap hingga kembali ke laut. Penggeraknya adalah panas matahari.</p>
+        <p>Jumlah air di bumi hampir tetap. Air hanya berpindah tempat dan berubah wujud.</p>
+        <div class="about-grid">
+          <div class="panel" style="background:var(--bg)"><h3>💧 Cair</h3><p>Air laut, sungai, hujan, dan air tanah.</p></div>
+          <div class="panel" style="background:var(--bg)"><h3>♨️ Gas</h3><p>Uap air yang naik ke udara saat air dipanasi.</p></div>
+          <div class="panel" style="background:var(--bg)"><h3>🧊 Padat</h3><p>Es dan salju di puncak gunung yang tinggi.</p></div>
+        </div>
+      </section>
+      <section class="block">
+        <h2>Proses siklus air</h2>
+        <div class="hero">
+        <p>Ketuk tiap tahap pada gambar atau pilih tombol di bawahnya.</p>
+        <svg class="diagram" viewBox="0 0 600 330" role="img" aria-label="Diagram siklus air: penguapan, pembentukan awan, hujan, dan resapan ke tanah">
+          <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ffb703"/></marker></defs>
+          <rect width="600" height="330" fill="none"/>
+          <g><circle cx="70" cy="60" r="30" fill="#ffb703"/><g stroke="#ffb703" stroke-width="5" stroke-linecap="round"><path d="M70 14v-8M70 106v8M24 60h-8M116 60h8M37 27l-6-6M103 93l6 6M103 27l6-6M37 93l-6 6"/></g></g>
+          <!-- gunung -->
+          <path d="M330 250 L450 110 L520 190 L560 150 L600 200 V250Z" fill="var(--ground)"/>
+          <path d="M432 132 L450 110 L468 132 L455 128 L447 135Z" fill="#fff"/>
+          <!-- laut -->
+          <path d="M0 250 H330 V330 H0Z" fill="var(--sea)"/>
+          <path d="M20 270q15-10 30 0t30 0t30 0M150 295q15-10 30 0t30 0t30 0" stroke="#fff" stroke-opacity=".6" stroke-width="3" fill="none"/>
+          <!-- tanah -->
+          <path d="M330 250 H600 V330 H330Z" fill="var(--ground)"/><path d="M330 250 H600 V262 H330Z" fill="var(--grass)"/>
+          <g fill="#2e7d32"><path d="M410 250l18-45 18 45z"/><path d="M490 250l14-36 14 36z"/></g>
+          <!-- awan -->
+          <g class="cloud-move"><g fill="#fff" stroke="#9cc9e2" stroke-width="2"><ellipse cx="300" cy="70" rx="55" ry="26"/><circle cx="270" cy="55" r="24"/><circle cx="318" cy="48" r="30"/></g></g>
+          <g class="rain" stroke="#0a7bb8" stroke-width="3" stroke-linecap="round"><line x1="275" y1="108" x2="271" y2="122"/><line x1="300" y1="110" x2="296" y2="124" style="animation-delay:.3s"/><line x1="325" y1="108" x2="321" y2="122" style="animation-delay:.6s"/></g>
+          <!-- tahap 1 penguapan -->
+          <g class="stage" data-s="0" tabindex="0" role="button" aria-label="Evaporasi">
+            <rect class="hot" x="90" y="110" width="110" height="140" rx="16" fill="#ffb703" fill-opacity=".25" stroke="#ffb703" stroke-width="3"/>
+            <g class="vap" stroke="#ffb703" stroke-width="5" fill="none" stroke-linecap="round"><path d="M110 240q-8-15 0-30t0-30"/><path d="M150 240q-8-15 0-30t0-30" style="animation-delay:.6s"/><path d="M190 240q-8-15 0-30t0-30" style="animation-delay:1.2s"/></g>
+            <text x="145" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">Evaporasi</text>
+          </g>
+          <g class="stage" data-s="1" tabindex="0" role="button" aria-label="Transpirasi">
+            <rect class="hot" x="385" y="160" width="150" height="92" rx="16" fill="#ffb703" fill-opacity=".25" stroke="#ffb703" stroke-width="3"/>
+            <g class="vap" stroke="#ffb703" stroke-width="4" fill="none" stroke-linecap="round"><path d="M428 200q-6-10 0-20t0-20"/><path d="M504 208q-6-10 0-20t0-20" style="animation-delay:.8s"/></g>
+            <text x="460" y="153" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Transpirasi</text>
+          </g>
+          <!-- tahap kondensasi -->
+          <g class="stage" data-s="2" tabindex="0" role="button" aria-label="Kondensasi">
+            <rect class="hot" x="205" y="10" width="190" height="105" rx="16" fill="#ffb703" fill-opacity=".25" stroke="#ffb703" stroke-width="3"/>
+            <text x="300" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">Kondensasi</text>
+          </g>
+          <!-- tahap 3 presipitasi -->
+          <g class="stage" data-s="3" tabindex="0" role="button" aria-label="Presipitasi">
+            <rect class="hot" x="250" y="125" width="100" height="120" rx="16" fill="#ffb703" fill-opacity=".25" stroke="#ffb703" stroke-width="3"/>
+            <text x="300" y="195" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">Presipitasi</text>
+          </g>
+          <!-- tahap 4 infiltrasi -->
+          <g class="stage" data-s="4" tabindex="0" role="button" aria-label="Infiltrasi">
+            <rect class="hot" x="360" y="255" width="230" height="70" rx="16" fill="#ffb703" fill-opacity=".25" stroke="#ffb703" stroke-width="3"/>
+            <path d="M420 275v35M500 275v35" stroke="#4fc3f7" stroke-width="5" marker-end="url(#ar)"/>
+            <path d="M345 255 Q300 262 270 262" stroke="#4fc3f7" stroke-width="4" fill="none" marker-end="url(#ar)"/>
+            <text x="475" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Infiltrasi</text>
+          </g>
+        </svg>
+        <div class="tabs" id="tabs"></div>
+        <div class="info" id="info" aria-live="polite"></div>
+      </div></section>
+
+      <section class="block">
+        <h2>Mengenal 5 istilah penting</h2>
+        <div class="about-grid">
+          <div class="panel"><h3>☀️ Evaporasi</h3><p>Penguapan air dari laut, sungai, danau, dan genangan karena panas matahari. Air cair berubah menjadi uap air (gas) dan naik ke udara.</p></div>
+          <div class="panel"><h3>🌿 Transpirasi</h3><p>Penguapan air dari tumbuhan. Akar menyerap air dari tanah, lalu uap air dilepas ke udara lewat pori-pori kecil (stomata) di daun.</p></div>
+          <div class="panel"><h3>☁️ Kondensasi</h3><p>Uap air yang naik bertemu udara dingin lalu berubah menjadi titik-titik air kecil. Titik-titik ini berkumpul membentuk awan.</p></div>
+          <div class="panel"><h3>🌧️ Presipitasi</h3><p>Jatuhnya air dari awan ke permukaan bumi. Bentuknya bisa hujan, hujan es, atau salju, tergantung suhu udara.</p></div>
+          <div class="panel"><h3>🌱 Infiltrasi</h3><p>Meresapnya air hujan ke dalam tanah dan menjadi air tanah. Air yang tidak meresap mengalir lewat sungai kembali ke laut.</p></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Aktivitas belajar</h2>
+        <div class="about-grid">
+          <div class="panel"><h3>📖 Tutorial</h3><p>Belajar langkah demi langkah.</p><button class="btn" data-go="tutorial">Mulai</button></div>
+          <div class="panel"><h3>✏️ Latihan</h3><p>Practice &amp; drill soal berulang.</p><button class="btn" data-go="drill">Mulai</button></div>
+          <div class="panel"><h3>🔬 Simulasi</h3><p>Atur matahari dan tumbuhan, lihat hasilnya.</p><button class="btn" data-go="sim">Coba</button></div>
+          <div class="panel"><h3>🎮 Game H5P</h3><p>Main game interaktif.</p><button class="btn" data-go="game">Main</button></div>
+        </div>
+      </section>
+
+      <section class="block" id="minigame">
+        <h2>Mini game</h2>
+        <div class="panel">
+          <h3>Urutkan siklus air</h3>
+          <p>Tekan tahap sesuai urutan yang benar, mulai dari air laut yang dipanasi matahari. Evaporasi dan transpirasi boleh dipilih mana saja lebih dulu.</p>
+          <div class="slots" id="slots" aria-live="polite"></div>
+          <div class="opts" id="opts"></div>
+          <p class="msg" id="gm"></p>
+          <button class="btn ghost" id="reset">Main lagi</button>
+        </div>
+      </section>
+      <section class="block panel" style="text-align:center">
+        <h2>💡 Tahukah kamu?</h2>
+        <p id="fact" style="font-size:1.15rem">Ketuk tombol untuk membaca fakta seru!</p>
+        <button class="btn" id="factBtn">Fakta lain</button>
+      </section>
+      <p style="text-align:center;margin-top:1.5rem"><button class="btn" id="toGame">Lanjut ke Game →</button></p>
+    </div>
+
+    <!-- TUTORIAL -->
+    <div id="tutorial" class="hidden">
+      <div class="hero"><h1>Tutorial 📖</h1><p>Ikuti langkah demi langkah untuk memahami perjalanan setetes air.</p></div>
+      <section class="block panel">
+        <div class="bar"><i id="tbar"></i></div>
+        <div id="tstep" aria-live="polite" style="margin:1rem 0"></div>
+        <div class="row" style="justify-content:space-between"><button class="btn ghost" id="tprev">← Sebelumnya</button><button class="btn" id="tnext">Berikutnya →</button></div>
+      </section>
+    </div>
+
+    <!-- DRILL -->
+    <div id="drill" class="hidden">
+      <div class="hero"><h1>Latihan ✏️</h1><p>Practice &amp; drill: jawab soal secara acak, langsung dapat pembahasan. Ulangi sampai lancar.</p></div>
+      <section class="block panel">
+        <p class="msg" id="dprog"></p>
+        <h3 id="dq"></h3>
+        <div class="dopts" id="dopts"></div>
+        <p class="msg" id="dfb" aria-live="polite"></p>
+        <button class="btn hidden" id="dnext">Berikutnya</button>
+      </section>
+    </div>
+
+    <!-- SIMULASI -->
+    <div id="sim" class="hidden">
+      <div class="hero"><h1>Simulasi 🔬</h1><p>Geser pengaturan dan amati bagaimana siklus air berubah.</p></div>
+      <section class="block panel">
+        <svg id="simsvg" class="diagram" viewBox="0 0 600 260" role="img" aria-label="Simulasi siklus air"></svg>
+        <label for="rs">☀️ Intensitas matahari: <span id="vs">60</span>%</label>
+        <input id="rs" type="range" min="0" max="100" value="60">
+        <label for="rt">🌳 Jumlah tumbuhan: <span id="vt">50</span>%</label>
+        <input id="rt" type="range" min="0" max="100" value="50">
+        <div id="meters" style="margin-top:1rem"></div>
+        <p class="msg" id="simmsg" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <!-- GAME -->
+    <div id="game" class="hidden">
+      <div class="hero">
+        <h1>Game H5P 🎮</h1>
+        <p>Pilih game favoritmu dan kumpulkan bintang ⭐!</p>
+      </div>
+      <section class="block">
+        <div class="game-grid" style="grid-template-columns:1fr">
+          <div class="panel">
+            <div class="tabs" id="gtabs"><button class="on" data-g="0">Kuis H5P 1</button><button data-g="1">Kuis H5P 2</button><button data-g="2">🌧️ Tangkap Hujan</button><button data-g="3">🃏 Kartu Pasangan</button></div>
+            <div id="h5pBox" class="h5p-frame"><span>Memuat game...</span></div>
+            <p class="msg"><a id="h5pOpen" href="https://h5p.org/h5p/embed/1569845" target="_blank" rel="noopener" style="color:var(--primary)">Buka di tab baru</a> jika game tidak tampil.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ABOUT -->
+    <div id="about" class="hidden">
+      <div class="hero">
+        <h1>Tentang website ini</h1>
+        <p>Media belajar interaktif IPAS Kelas 5 SD tentang siklus air. Belajar sambil bermain, lengkap dengan musik, simulasi, dan game seru!</p>
+      </div>
+      <div class="about-grid">
+        <div class="panel"><h3>🌐 Tentang website</h3><p>Website ini dibuat sebagai media belajar interaktif IPAS tentang siklus air. Isinya penjelasan materi bergambar serta empat aktivitas: Tutorial, Latihan (practice &amp; drill), Simulasi, dan Game H5P.</p></div>
+        <div class="panel"><h3>🎯 Tujuan pembelajaran</h3><ol class="steps"><li>Menjelaskan pengertian siklus air.</li><li>Menyebutkan dan mengurutkan tahap siklus air.</li><li>Menjelaskan peran matahari dalam siklus air.</li></ol></div>
+      </div>
+      <p style="text-align:center;margin-top:1.5rem"><button class="btn ghost" data-go="home">← Kembali ke Beranda</button></p>
+    </div>
+  </main>
+  <div id="mas" title="Ketuk aku untuk fakta seru"><svg viewBox="0 0 60 80" width="60" aria-hidden="true"><path d="M30 4C30 4 6 34 6 52a24 24 0 0 0 48 0C54 34 30 4 30 4z" fill="#4fc3f7" stroke="#0a7bb8" stroke-width="3"/><circle cx="22" cy="50" r="4" fill="#0b2a3c"/><circle cx="38" cy="50" r="4" fill="#0b2a3c"/><path d="M22 62q8 8 16 0" stroke="#0b2a3c" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="20" cy="34" rx="4" ry="8" fill="#fff" opacity=".6" transform="rotate(20 20 34)"/></svg><div id="bub"></div></div>
+  <footer>💧 Petualangan Siklus Air · IPAS Kelas 5 SD</footer>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const stages=[
+ {t:"1. Evaporasi",e:"☀️",d:"Panas matahari membuat air laut, sungai, dan danau menguap menjadi uap air yang naik ke udara."},
+ {t:"2. Transpirasi",e:"🌿",d:"Tumbuhan menyerap air lewat akar, lalu melepaskan uap air ke udara melalui pori-pori kecil di daun."},
+ {t:"3. Kondensasi",e:"☁️",d:"Di tempat tinggi udara dingin. Uap air berubah menjadi titik-titik air kecil dan berkumpul menjadi awan."},
+ {t:"4. Presipitasi",e:"🌧️",d:"Titik air dalam awan makin besar dan berat, lalu jatuh ke bumi sebagai hujan."},
+ {t:"5. Infiltrasi",e:"🌱",d:"Sebagian air meresap ke dalam tanah, sebagian mengalir lewat sungai kembali ke laut. Lalu siklus dimulai lagi."}
+];
+let cur=0;
+let snd=true,mt,AC,simWon=0,stars=0,bi=0,nt=0,song=0,NB,stopCatch=()=>{};
+function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
+function tone(f,t,d,ty,v){const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05)}
+const nf=n=>261.63*Math.pow(2,n/12),_=null,SN=['🎵 Ceria','🎵 Semangat'];
+const songs=[
+ {bpm:124,w:'triangle',v:.1,bp:[0,2,4,6],k:[0,4],h:[2,6],bars:[
+  [-12,[12,16,19,16,12,16,19,16]],[-17,[11,14,19,14,11,14,19,14]],[-15,[9,12,16,12,9,12,16,12]],[-19,[9,12,17,12,9,12,17,12]],
+  [-12,[16,_,16,19,_,16,12,_]],[-17,[14,_,14,19,_,14,11,_]],[-15,[12,_,12,16,_,12,9,_]],[-19,[17,_,16,14,12,_,14,_]]]},
+ {bpm:144,w:'square',v:.035,bp:[0,3,4,7],k:[0,2,4,6],h:[1,3,5,7],bars:[
+  [-5,[19,_,14,19,_,14,19,_]],[-10,[18,_,14,18,_,14,18,_]],[-8,[16,_,11,16,_,11,16,_]],[-12,[16,_,12,16,_,12,14,_]],
+  [-5,[14,19,23,19,14,19,23,19]],[-10,[14,18,21,18,14,18,21,18]],[-8,[16,19,23,19,16,19,23,19]],[-12,[12,16,19,16,12,16,19,_]]]}
+];
+function kick(t){const a=ac(),o=a.createOscillator(),g=a.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+.2)}
+function hat(t){const a=ac();if(!NB){NB=a.createBuffer(1,a.sampleRate*.05,a.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=NB;f.type='highpass';f.frequency.value=7000;g.gain.setValueAtTime(.07,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
+function bar(){const a=ac(),S=songs[song],st=60/S.bpm/2;if(nt<a.currentTime)nt=a.currentTime+.05;const b=S.bars[bi++%S.bars.length];
+ for(let i=0;i<8;i++){const t=nt+i*st;
+  if(b[1][i]!==null)tone(nf(b[1][i]),t,st*1.8,S.w,S.v);
+  if(S.bp.includes(i))tone(nf(b[0]+(i%4?7:0)),t,st*1.6,'triangle',.16);
+  if(S.k.includes(i))kick(t);
+  if(S.h.includes(i))hat(t)}
+ nt+=8*st}
+function music(on){clearInterval(mt);if(on&&snd){nt=0;bi=0;bar();mt=setInterval(()=>{if(ac().currentTime>nt-1)bar()},250)}}
+function setSnd(v){snd=v;$('#sndBtn').textContent=v?'🔊':'🔇';music(v)}
+function sfx(k){if(!snd)return;const t=ac().currentTime;if(k==='ok'){tone(660,t,.25,'triangle',.14);tone(880,t+.12,.3,'triangle',.14)}else if(k==='no')tone(170,t,.3,'sawtooth',.07);else if(k==='win')[523,659,784,1047].forEach((f,i)=>tone(f,t+i*.12,.35,'triangle',.14));else tone(620,t,.08,'sine',.08)}
+function confetti(){for(let i=0;i<40;i++){const s=document.createElement('i');s.className='cf';s.style.left=Math.random()*100+'vw';s.style.background=['#ffb703','#4fc3f7','#5fae5f','#ff6b9d'][i%4];s.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),2800)}}
+function star(n){stars+=n;$('#stars').textContent='⭐ '+stars;toast('Kamu dapat '+n+' bintang ⭐');confetti()}
+const facts=['Air yang kamu minum bisa jadi pernah diminum dinosaurus jutaan tahun lalu!','Sekitar 71% permukaan bumi tertutup air, tetapi kebanyakan adalah air asin di laut.','Satu pohon besar bisa melepas puluhan sampai ratusan liter air ke udara tiap hari lewat transpirasi.','Awan tampak putih karena titik-titik airnya memantulkan cahaya matahari.','Air hujan yang meresap ke tanah bisa menjadi air sumur yang kita pakai.','Air tidak pernah habis. Air hanya berputar dari laut ke langit, lalu kembali ke bumi.'];
+const tips={home:'Halo, aku Tetes! Ketuk gambar siklus air ya.',tutorial:'Baca pelan-pelan, lalu tekan Berikutnya!',drill:'Jangan takut salah. Ayo coba lagi!',sim:'Geser matahari dan lihat apa yang terjadi!',game:'Main game untuk dapat bintang ⭐',about:'Terima kasih sudah belajar bersama!'};
+function tip(v){$('#bub').textContent=tips[v]}
+const rf=()=>facts[Math.floor(Math.random()*facts.length)];
+$('#mas').onclick=()=>{$('#bub').textContent='💡 '+rf()};
+$('#factBtn').onclick=()=>{$('#fact').textContent='💡 '+rf()};
+$('#sndBtn').onclick=()=>setSnd(!snd);
+$('#songBtn').onclick=()=>{song=1-song;$('#songBtn').textContent=SN[song];toast('Lagu: '+SN[song].slice(3));if(snd)music(true)};
+document.addEventListener('click',e=>{if(e.target.closest('.btn,.link,.tabs button'))sfx('click')});
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.i);toast.i=setTimeout(()=>t.classList.add('hidden'),2600)}
+function show(v){['home','tutorial','drill','sim','game','about'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==v));
+ $$('[data-go].link').forEach(b=>b.toggleAttribute('aria-current',b.dataset.go===v)&&b.setAttribute('aria-current','page'));
+ $$('.nav .link[data-go]').forEach(b=>{if(b.dataset.go!==v)b.removeAttribute('aria-current')});scrollTo(0,0);stopCatch();if(v==='game')loadGame(0);tip(v)}
+function enter(name){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#nm').textContent=name;show('home');toast('Selamat datang, '+name+'!');setSnd(true)}
+function leave(){$('#app').classList.add('hidden');$('#login').classList.remove('hidden');$('#u').value='';$('#p').value='';$('#err').textContent='';music(false);toast('Kamu sudah keluar. Sampai jumpa!')}
+/* login */
+$('#loginBtn').onclick=()=>{const u=$('#u').value.trim();$('#err').textContent='';enter(u||'Siswa')};
+['u','p'].forEach(i=>$('#'+i).addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()}));
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
+$('#logoutBtn').onclick=()=>{if(confirm('Yakin ingin keluar?'))leave()};
+/* tetesan hujan login */
+const dr=$('.drops');for(let i=0;i<22;i++){const s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.animationDuration=(3+Math.random()*4)+'s';s.style.animationDelay=(-Math.random()*6)+'s';dr.appendChild(s)}
+/* tahap */
+function pick(i){cur=i;$$('#tabs button').forEach((b,k)=>b.classList.toggle('on',k===i));$$('.stage').forEach(g=>g.classList.toggle('on',+g.dataset.s===i));
+ $('#info').innerHTML='<h3>'+stages[i].e+' '+stages[i].t+'</h3><p style="margin:0">'+stages[i].d+'</p>'}
+stages.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s.t;b.onclick=()=>pick(i);$('#tabs').appendChild(b)});
+$$('.stage').forEach(g=>{g.onclick=()=>pick(+g.dataset.s);g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(+g.dataset.s)}}});
+pick(0);
+$('#toGame').onclick=()=>show('game');
+/* mini game */
+let order,pos;
+function newGame(){pos=0;order=[0,1,2,3,4].sort(()=>Math.random()-.5);$('#slots').innerHTML='';$('#gm').textContent='';
+ const o=$('#opts');o.innerHTML='';order.forEach(i=>{const b=document.createElement('button');b.textContent=stages[i].e+' '+stages[i].t.replace(/^\d\.\s/,'');
+  b.onclick=()=>{if(i===pos||(pos<2&&i<2)){sfx('ok');b.disabled=true;const s=document.createElement('span');s.textContent=stages[i].e;$('#slots').appendChild(s);pos++;
+   $('#gm').textContent=pos===5?'🎉 Hebat! Urutanmu benar semua.':'Benar! Lanjut ke tahap berikutnya.';if(pos===5){star(2);sfx('win')}}
+   else{sfx('no');$('#gm').textContent='Belum tepat. Coba pikirkan tahap yang lebih dulu terjadi.'}};o.appendChild(b)})}
+$('#reset').onclick=newGame;newGame();
+/* tutorial */
+const tut=[
+ ['💧','Kenali siklus air','Air di bumi tidak hilang. Air berputar terus dari laut ke udara, ke daratan, lalu kembali ke laut.','Siklus air digerakkan oleh panas matahari.'],
+ ['☀️','Matahari memanaskan air','Panas matahari menguapkan air laut dan sungai (evaporasi). Tumbuhan juga melepas uap air lewat daun (transpirasi).','Evaporasi dan transpirasi sama-sama membuat uap air naik.'],
+ ['☁️','Awan terbentuk','Di ketinggian udara dingin. Uap air mengembun menjadi titik air kecil (kondensasi) dan berkumpul menjadi awan.','Kondensasi: uap air berubah menjadi cair.'],
+ ['🌧️','Hujan turun','Titik air dalam awan makin besar dan berat, lalu jatuh sebagai hujan, hujan es, atau salju (presipitasi).','Presipitasi: air jatuh dari awan ke bumi.'],
+ ['🌱','Air kembali ke laut','Sebagian air meresap ke tanah (infiltrasi), sebagian mengalir lewat sungai ke laut. Lalu siklus dimulai lagi.','Infiltrasi: air meresap ke dalam tanah.']
+];
+let ti=0;
+function tShow(){const x=tut[ti];$('#tbar').style.width=((ti+1)/tut.length*100)+'%';
+ $('#tstep').innerHTML='<div style="text-align:center"><div style="font-size:4rem">'+x[0]+'</div><p class="msg" style="margin:0">Langkah '+(ti+1)+' dari '+tut.length+'</p><h2>'+x[1]+'</h2><p>'+x[2]+'</p></div><div class="info"><b>Ingat:</b> '+x[3]+'</div>';
+ $('#tprev').disabled=ti===0;$('#tnext').textContent=ti===tut.length-1?'Lanjut ke Latihan →':'Berikutnya →'}
+$('#tprev').onclick=()=>{if(ti>0){ti--;tShow()}};
+$('#tnext').onclick=()=>{if(ti<tut.length-1){ti++;tShow()}else show('drill')};
+tShow();
+/* latihan */
+const qs=[
+ {q:'Apa yang menggerakkan siklus air?',o:['Angin laut','Panas matahari','Gaya bulan'],a:1,e:'Panas matahari menguapkan air sehingga siklus berjalan.'},
+ {q:'Penguapan air dari laut, sungai, dan danau disebut...',o:['Evaporasi','Kondensasi','Infiltrasi'],a:0,e:'Evaporasi adalah air cair yang berubah menjadi uap.'},
+ {q:'Penguapan air dari daun tumbuhan disebut...',o:['Presipitasi','Transpirasi','Evaporasi'],a:1,e:'Transpirasi terjadi lewat pori-pori daun.'},
+ {q:'Uap air berubah menjadi titik air kecil dan membentuk awan. Proses ini disebut...',o:['Kondensasi','Evaporasi','Presipitasi'],a:0,e:'Di udara dingin, uap air mengembun menjadi awan.'},
+ {q:'Air jatuh dari awan sebagai hujan atau salju disebut...',o:['Infiltrasi','Transpirasi','Presipitasi'],a:2,e:'Presipitasi adalah jatuhnya air dari awan ke bumi.'},
+ {q:'Air hujan yang meresap ke dalam tanah disebut...',o:['Infiltrasi','Kondensasi','Evaporasi'],a:0,e:'Infiltrasi menambah air tanah.'},
+ {q:'Apa yang terjadi pada uap air di udara yang dingin?',o:['Menjadi titik air kecil','Menjadi batu','Hilang tanpa sisa'],a:0,e:'Uap air mengembun menjadi titik air.'},
+ {q:'Urutan yang paling tepat adalah...',o:['Presipitasi, evaporasi, kondensasi','Evaporasi, kondensasi, presipitasi','Kondensasi, presipitasi, evaporasi'],a:1,e:'Air naik dulu, membentuk awan, lalu turun sebagai hujan.'}
+];
+let dq,di,ds;
+function dStart(){dq=[...qs].sort(()=>Math.random()-.5);di=0;ds=0;dShow()}
+function dShow(){const n=$('#dnext');
+ if(di>=dq.length){$('#dprog').textContent='Selesai!';$('#dq').textContent='Skor kamu: '+ds+' dari '+dq.length+(ds===dq.length?' 🎉 Sempurna!':' 👍 Ulangi untuk skor lebih tinggi.');$('#dopts').innerHTML='';$('#dfb').textContent='';n.textContent='Ulangi latihan';n.classList.remove('hidden');n.onclick=dStart;star(ds>=6?2:1);sfx('win');return}
+ const x=dq[di];$('#dprog').textContent='Soal '+(di+1)+' dari '+dq.length+' · Skor '+ds;$('#dq').textContent=x.q;$('#dfb').textContent='';n.classList.add('hidden');
+ const o=$('#dopts');o.innerHTML='';
+ x.o.map((t,k)=>({t,ok:k===x.a})).sort(()=>Math.random()-.5).forEach(it=>{const b=document.createElement('button');b.textContent=it.t;b.onclick=()=>{
+  $$('#dopts button').forEach(z=>z.disabled=true);b.style.background=it.ok?'#2e9e5b':'#d6336c';b.style.color='#fff';
+  if(it.ok){ds++;sfx('ok')}else sfx('no');$('#dfb').textContent=(it.ok?'✅ Benar! ':'❌ Belum tepat. ')+x.e;
+  n.textContent=di===dq.length-1?'Lihat skor':'Soal berikutnya';n.classList.remove('hidden');n.onclick=()=>{di++;dShow()}};o.appendChild(b)})}
+dStart();
+/* simulasi */
+function sim(){const s=+$('#rs').value,t=+$('#rt').value;$('#vs').textContent=s;$('#vt').textContent=t;
+ const ev=s,tr=Math.round(s*t/100),va=Math.min(100,Math.round(ev*.7+tr*.5)),rain=va>40?Math.round((va-40)*1.6):0,inf=Math.round(rain*(.4+t/200));
+ const drops=Math.min(8,Math.round(rain/12)),trees=Math.max(1,Math.round(t/25)),sc=.5+va/100;
+ let h='<rect width="600" height="260" fill="var(--sky1)"/><circle cx="60" cy="50" r="'+(14+s*.25)+'" fill="#ffb703" opacity="'+(.35+s/160)+'"/>';
+ h+='<rect y="200" width="300" height="60" fill="var(--sea)"/><rect x="300" y="200" width="300" height="60" fill="var(--ground)"/><rect x="300" y="200" width="300" height="10" fill="var(--grass)"/>';
+ h+='<rect x="300" y="'+(260-inf/2)+'" width="300" height="'+(inf/2)+'" fill="var(--sea)" opacity=".7"/>';
+ h+='<g class="vap" stroke="#ffb703" stroke-width="4" fill="none" stroke-linecap="round" opacity="'+(ev>0?1:0)+'">';
+ for(let i=0;i<Math.round(ev/25);i++)h+='<path d="M'+(40+i*55)+' 195q-8-15 0-30t0-30" style="animation-delay:'+(i*.4)+'s"/>';
+ for(let k=0;k<trees;k++){const x=330+k*60;h+='<path d="M'+x+' 200l18-45 18 45z" fill="#2e7d32" stroke="none"/>';if(tr>10)h+='<path d="M'+(x+18)+' 150q-6-10 0-20t0-20" style="animation-delay:'+(k*.3)+'s"/>'}
+ h+='</g><g transform="translate(300 60) scale('+sc+')"><g fill="'+(rain>0?'#8fa3b0':'#fff')+'" stroke="#9cc9e2" stroke-width="2"><ellipse cx="0" cy="10" rx="55" ry="26"/><circle cx="-30" cy="-5" r="24"/><circle cx="18" cy="-12" r="30"/></g></g>';
+ h+='<g class="rain" stroke="#0a7bb8" stroke-width="3" stroke-linecap="round">';
+ for(let k=0;k<drops;k++)h+='<line x1="'+(250+k*14)+'" y1="125" x2="'+(246+k*14)+'" y2="141" style="animation-delay:'+(k*.15)+'s"/>';
+ $('#simsvg').innerHTML=h+'</g>';
+ const m=[['Evaporasi',ev],['Transpirasi',tr],['Pembentukan awan',va],['Hujan',Math.min(100,rain)],['Infiltrasi',Math.min(100,inf)]];
+ $('#meters').innerHTML=m.map(a=>'<div class="meter">'+a[0]+': '+a[1]+'%<div class="bar"><i style="width:'+a[1]+'%"></i></div></div>').join('');
+ if(rain>60&&!simWon){simWon=1;star(1)}
+ $('#simmsg').textContent=s===0?'Tanpa matahari tidak ada penguapan, jadi siklus berhenti.':rain===0?'Uap air belum cukup untuk membentuk awan hujan. Naikkan intensitas matahari.':(rain>60?'Awan tebal! Hujan lebat dan banyak air meresap. ':'Awan terbentuk dan hujan turun. ')+(t>60?'Banyak tumbuhan membuat transpirasi dan resapan meningkat.':'')}
+['rs','rt'].forEach(i=>$('#'+i).addEventListener('input',sim));sim();
+/* game H5P */
+const games=['https://h5p.org/h5p/embed/1569845','https://h5p.org/h5p/embed/1569842'];
+function loadGame(i){stopCatch();$('#h5pOpen').parentNode.style.display=i<2?'':'none';$$('#gtabs button').forEach((b,k)=>b.classList.toggle('on',k===i));
+ const f=document.createElement('iframe');f.className='h5p';f.src=games[i];f.title='Game H5P '+(i+1);f.allowFullscreen=true;f.setAttribute('allow','fullscreen');
+ const b=$('#h5pBox');if(i===2)return catchGame(b);if(i===3)return memGame(b);b.className='';b.innerHTML='';b.appendChild(f);$('#h5pOpen').href=games[i]}
+$$('#gtabs button').forEach(b=>b.onclick=()=>loadGame(+b.dataset.g));
+/* game tangkap hujan */
+function catchGame(box){box.className='';
+ box.innerHTML='<canvas id="cv" width="480" height="360" style="width:100%;max-width:480px;border-radius:16px;background:linear-gradient(#bfe6fa,#eaf6fb);touch-action:none;display:block;margin:0 auto"></canvas><p class="msg" id="cs" style="text-align:center">Geser keranjang untuk menangkap 💧. Hindari sampah 🗑️!</p><p style="text-align:center"><button class="btn" id="cgo">Mulai main</button></p>';
+ const c=$('#cv'),x=c.getContext('2d');let bx=240,items=[],sc=0,tl=30,run=false,last=0,sp=0,raf=0;
+ const mv=e=>{const r=c.getBoundingClientRect(),px=e.touches?e.touches[0].clientX:e.clientX;bx=(px-r.left)/r.width*480};
+ c.addEventListener('mousemove',mv);c.addEventListener('touchmove',e=>{e.preventDefault();mv(e)},{passive:false});
+ function draw(){x.clearRect(0,0,480,360);x.textAlign='center';x.font='28px sans-serif';items.forEach(i=>x.fillText(i.e,i.x,i.y));x.font='42px sans-serif';x.fillText('🪣',bx,350);x.font='bold 18px sans-serif';x.fillStyle='#0b2a3c';x.textAlign='left';x.fillText('Skor: '+sc,10,24);x.textAlign='right';x.fillText('Waktu: '+Math.ceil(tl),470,24)}
+ function loop(t){if(!run)return;const dt=Math.min(.05,(t-last)/1000);last=t;tl-=dt;sp-=dt;
+  if(sp<=0){sp=.55;items.push({x:20+Math.random()*440,y:-10,e:Math.random()<.75?'💧':'🗑️',v:110+Math.random()*80})}
+  items.forEach(i=>i.y+=i.v*dt);
+  items=items.filter(i=>{if(i.y>315&&Math.abs(i.x-bx)<40){if(i.e==='💧'){sc++;sfx('ok')}else{sc=Math.max(0,sc-2);sfx('no')}return false}return i.y<370});
+  draw();if(tl<=0){run=false;$('#cs').textContent='Selesai! Skormu '+sc+'. '+(sc>=15?'Hebat sekali!':'Bagus! Coba lagi ya.');if(sc>=15)star(2);else if(sc>=8)star(1);sfx('win');return}
+  raf=requestAnimationFrame(loop)}
+ stopCatch=()=>{run=false;cancelAnimationFrame(raf)};
+ $('#cgo').onclick=()=>{items=[];sc=0;tl=30;sp=0;run=true;last=performance.now();$('#cs').textContent='Tangkap 💧, hindari 🗑️!';cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)};
+ draw()}
+/* game kartu pasangan */
+function memGame(box){box.className='';
+ const pr=[['☀️','Evaporasi'],['🌿','Transpirasi'],['☁️','Kondensasi'],['🌧️','Presipitasi'],['🌱','Infiltrasi']];
+ const cards=[];pr.forEach(p=>cards.push({k:p[1],t:p[0],em:1},{k:p[1],t:p[1]}));cards.sort(()=>Math.random()-.5);
+ let open=[],done=0,mv=0,lock=false;
+ box.innerHTML='<p class="msg" id="ms" style="text-align:center">Cocokkan gambar dengan namanya!</p><div class="mem" id="mg"></div><p style="text-align:center"><button class="btn ghost" id="mre">Main lagi</button></p>';
+ cards.forEach(c=>{const b=document.createElement('button');b.className='mc'+(c.em?' em':'');b.textContent='❓';
+  b.onclick=()=>{if(lock||b.classList.contains('up'))return;b.classList.add('up');b.textContent=c.t;sfx('click');open.push([b,c]);
+   if(open.length===2){mv++;lock=true;const [a,d]=open;
+    if(a[1].k===d[1].k){sfx('ok');a[0].classList.add('ok');d[0].classList.add('ok');open=[];lock=false;done++;if(done===5){$('#ms').textContent='Hebat! Selesai dalam '+mv+' langkah.';star(mv<=8?3:2);sfx('win')}}
+    else setTimeout(()=>{a[0].classList.remove('up');d[0].classList.remove('up');a[0].textContent=d[0].textContent='❓';open=[];lock=false},900)}};
+  $('#mg').appendChild(b)});
+ $('#mre').onclick=()=>memGame(box)}
+</script>
+</body>
+</html>
